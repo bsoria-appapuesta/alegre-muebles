@@ -147,6 +147,7 @@ class ClienteUpdate(BaseModel):
 class PagoCuota(BaseModel):
     cliente_id: int
     numero_cuota: int
+    fecha_pago: Optional[str] = None
 
 class ProducirMueble(BaseModel):
     cliente_id: int
@@ -450,7 +451,7 @@ def pagar_cuota(pago: PagoCuota):
         for q in cuotas:
             if q["numero"] == pago.numero_cuota:
                 q["estado"] = "Pagado"
-                q["fecha_pago"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+                q["fecha_pago"] = pago.fecha_pago.strip() if pago.fecha_pago else datetime.now().strftime("%d/%m/%Y %H:%M")
                 c.saldo_financiar = max(0, c.saldo_financiar - q["monto"])
                 c.cuotas_json = json.dumps(cuotas)
                 db.commit()
@@ -1001,7 +1002,7 @@ def mostrar_panel(request: Request):
                     <table style="width:100%; border:none; margin:0 0 15px 0; font-size:13px; min-width: 100%;">
                         <tr>
                             <td style="border:none; padding:3px 0; color:#555;"><strong>Fecha / Hora:</strong></td>
-                            <td style="border:none; padding:3px 0; text-align:right;" id="tktFecha"></td>
+                            <td style="border:none; padding:3px 0; text-align:right; cursor:pointer;" id="tktFecha" title="Haz clic para modificar la fecha en este recibo" onclick="editarFechaComprobante(this)"></td>
                         </tr>
                         <tr>
                             <td style="border:none; padding:3px 0; color:#555;"><strong>Cliente:</strong></td>
@@ -1100,7 +1101,7 @@ def mostrar_panel(request: Request):
 
             function parseMonedaValue(valStr) {{
                 if (!valStr) return 0;
-                let num = valStr.toString().replace(/\./g, '').replace(/,/g, '.');
+                let num = valStr.toString().replace(/\\./g, '').replace(/,/g, '.');
                 return parseFloat(num) || 0;
             }}
 
@@ -1566,11 +1567,16 @@ def mostrar_panel(request: Request):
                         ? `<button class="btn btn-secondary" onclick="imprimirReciboCuota(${{c.id}}, ${{q.numero}})">📄 Recibo</button>`
                         : `<button class="btn" onclick="pagarCuotaCliente(${{c.id}}, ${{q.numero}}, ${{q.monto}})">💰 Cobrar</button>`;
 
+                    let fechaMostrar = q.fecha_pago || '-';
+                    if (esPagado) {{
+                        fechaMostrar = `<span style="cursor:pointer; text-decoration:underline;" title="Clic para editar fecha" onclick="editarFechaCuotaDirecta(${{c.id}}, ${{q.numero}}, '${{q.fecha_pago || ''}}')">${{q.fecha_pago}} ✏️</span>`;
+                    }}
+
                     html += `<tr>
                         <td><strong>#${{q.numero}} de ${{totalCuotas}}</strong></td>
                         <td>${{formatoARS.format(q.monto)}}</td>
                         <td><span style="color:${{esPagado ? '#2e7d32' : '#d32f2f'}}; font-weight:600;">${{q.estado}}</span></td>
-                        <td>${{q.fecha_pago || '-'}}</td>
+                        <td>${{fechaMostrar}}</td>
                         <td>${{btnPagar}}</td>
                     </tr>`;
                 }});
@@ -1581,12 +1587,25 @@ def mostrar_panel(request: Request):
             }}
 
             async function pagarCuotaCliente(clienteId, numCuota, montoCuota) {{
-                if (!confirm(`¿Confirmar el cobro de la Cuota #${{numCuota}} por ${{formatoARS.format(montoCuota)}}?`)) return;
+                let d = new Date();
+                let dia = String(d.getDate()).padStart(2, '0');
+                let mes = String(d.getMonth() + 1).padStart(2, '0');
+                let anio = d.getFullYear();
+                let hora = String(d.getHours()).padStart(2, '0');
+                let min = String(d.getMinutes()).padStart(2, '0');
+                let fechaHoy = `${{dia}}/${{mes}}/${{anio}} ${{hora}}:${{min}}`;
+
+                let fechaElegida = prompt(`Cobro de Cuota #${{numCuota}} (${{formatoARS.format(montoCuota)}}).\\nPuedes editar la fecha del comprobante antes de guardarla:`, fechaHoy);
+                if (fechaElegida === null) return;
 
                 let res = await fetch('/pagar-cuota/', {{
                     method: 'POST',
                     headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ cliente_id: clienteId, numero_cuota: numCuota }})
+                    body: JSON.stringify({{ 
+                        cliente_id: clienteId, 
+                        numero_cuota: numCuota,
+                        fecha_pago: fechaElegida.trim()
+                    }})
                 }});
                 let r = await res.json();
                 if (r.error) {{
@@ -1595,6 +1614,35 @@ def mostrar_panel(request: Request):
                     document.getElementById('modalCuotas').style.display = 'none';
                     await cargarDatos();
                     verCuotasCliente(clienteId);
+                }}
+            }}
+
+            async function editarFechaCuotaDirecta(clienteId, numCuota, fechaActual) {{
+                let nueva = prompt(`Modificar fecha de pago registrada para la Cuota #${{numCuota}}:`, fechaActual);
+                if (nueva === null || nueva.trim() === '') return;
+
+                let res = await fetch('/pagar-cuota/', {{
+                    method: 'POST',
+                    headers: {{'Content-Type': 'application/json'}},
+                    body: JSON.stringify({{
+                        cliente_id: clienteId,
+                        numero_cuota: numCuota,
+                        fecha_pago: nueva.trim()
+                    }})
+                }});
+                let r = await res.json();
+                if (r.error) {{
+                    alert(r.error);
+                }} else {{
+                    await cargarDatos();
+                    verCuotasCliente(clienteId);
+                }}
+            }}
+
+            function editarFechaComprobante(el) {{
+                let nueva = prompt("Modificar fecha visible del comprobante antes de imprimir:", el.innerText);
+                if (nueva !== null && nueva.trim() !== "") {{
+                    el.innerText = nueva.trim();
                 }}
             }}
 
@@ -1676,4 +1724,5 @@ def mostrar_panel(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
