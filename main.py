@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, T
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # --- CONFIGURACIÓN BASE DE DATOS ---
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./alegra.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./alegre.db")
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -95,7 +95,7 @@ def inicializar_base_datos():
 
 inicializar_base_datos()
 
-app = FastAPI(title="Alegra Muebles - Sistema MRP")
+app = FastAPI(title="Alegre Muebles - Sistema MRP")
 
 if not os.path.exists("static"):
     os.makedirs("static")
@@ -197,30 +197,31 @@ def login_get(error: Optional[str] = None):
     <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Iniciar Sesión - Alegra Muebles</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Iniciar Sesión - Alegre Muebles</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
             * {{ box-sizing: border-box; }}
-            html, body {{ background-color: #ffffff !important; color: #000000 !important; margin: 0; padding: 0; font-family: 'Inter', sans-serif; height: 100vh; }}
+            html, body {{ background-color: #ffffff !important; color: #000000 !important; margin: 0; padding: 16px; font-family: 'Inter', sans-serif; min-height: 100vh; }}
             body {{ display: flex; align-items: center; justify-content: center; }}
-            .login-card {{ background: #f9f9f9; border: 1px solid #e0e0e0; padding: 32px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }}
+            .login-card {{ background: #f9f9f9; border: 1px solid #e0e0e0; padding: 28px 20px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }}
             .logo-container {{ background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; display: inline-block; margin-bottom: 16px; }}
             .logo-container img {{ width: 80px; height: 80px; object-fit: contain; display: block; }}
             h2 {{ margin: 0 0 8px 0; font-size: 22px; font-weight: 700; text-align: center; color: #000000 !important; }}
             p.sub {{ color: #666666 !important; font-size: 13px; text-align: center; margin-bottom: 24px; }}
             label {{ font-size: 13px; font-weight: 600; color: #333333 !important; display: block; margin-bottom: 6px; text-align: left; }}
-            input {{ width: 100%; background: #ffffff !important; color: #000000 !important; border: 1px solid #cccccc; padding: 10px 14px; font-size: 14px; border-radius: 6px; margin-bottom: 18px; outline: none; }}
+            input {{ width: 100%; background: #ffffff !important; color: #000000 !important; border: 1px solid #cccccc; padding: 12px 14px; font-size: 16px; border-radius: 6px; margin-bottom: 18px; outline: none; }}
             input:focus {{ border-color: #000000; }}
-            button {{ width: 100%; background: #000000 !important; color: #ffffff !important; font-weight: 700; border: none; padding: 12px; border-radius: 6px; font-size: 14px; cursor: pointer; }}
+            button {{ width: 100%; background: #000000 !important; color: #ffffff !important; font-weight: 700; border: none; padding: 14px; border-radius: 6px; font-size: 15px; cursor: pointer; }}
             button:hover {{ background: #333333 !important; }}
         </style>
     </head>
     <body>
         <div class="login-card">
             <div class="logo-container">
-                <img src="{logo_path}" alt="Logo Alegra Muebles" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
+                <img src="{logo_path}" alt="Logo Alegre Muebles" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
             </div>
-            <h2>Alegra Muebles</h2>
+            <h2>Alegre Muebles</h2>
             <p class="sub">Sistema MRP & Gestión Operativa</p>
             {mensaje_error}
             <form action="/login" method="post" style="text-align: left;">
@@ -326,9 +327,7 @@ def vender_producto_estandar(v: VenderEstandar):
         if cant_actual <= 0:
             return {"error": "No hay stock disponible de este mueble."}
 
-        # Descontar 1 unidad del stock de estandarizados
         p.cantidad = cant_actual - 1.0
-        
         fecha_hoy = datetime.now().strftime("%Y-%m-%d")
         
         db.add(EntregaModel(
@@ -614,55 +613,73 @@ def mostrar_panel(request: Request):
     <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Alegra Muebles - Sistema MRP</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alegre Muebles - Sistema MRP</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             * {{ box-sizing: border-box; }}
             html, body {{ background-color: #ffffff !important; color: #000000 !important; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }}
-            body {{ padding-top: 140px; }}
+            body {{ padding-top: 130px; }}
             
-            .header-fixed {{ position: fixed; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 1000; padding: 12px 24px 0 24px; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }}
-            .header-top {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; position: relative; }}
+            .header-fixed {{ position: fixed; top: 0; left: 0; width: 100%; background: #ffffff !important; z-index: 1000; padding: 10px 16px 0 16px; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }}
+            .header-top {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: relative; }}
             
-            .header-center-logo {{ position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: #f5f5f5; border: 1px solid #e0e0e0; padding: 4px 12px; border-radius: 6px; }}
-            .header-center-logo img {{ width: 28px; height: 28px; object-fit: contain; }}
-            .header-center-logo span {{ color: #000000 !important; font-weight: 700; font-size: 14px; }}
+            .header-center-logo {{ display: flex; align-items: center; gap: 8px; background: #f5f5f5; border: 1px solid #e0e0e0; padding: 4px 10px; border-radius: 6px; }}
+            .header-center-logo img {{ width: 26px; height: 26px; object-fit: contain; }}
+            .header-center-logo span {{ color: #000000 !important; font-weight: 700; font-size: 13px; }}
 
-            h1 {{ color: #000000 !important; font-size: 20px; margin: 0; font-weight: 700; }}
+            h1 {{ color: #000000 !important; font-size: 18px; margin: 0; font-weight: 700; white-space: nowrap; }}
             h2 {{ color: #000000 !important; font-size: 18px; margin-top: 0; }}
-            .tab {{ display: flex; gap: 4px; }}
-            .tab button {{ background-color: #f5f5f5; border: 1px solid #e0e0e0; border-bottom: none; border-radius: 8px 8px 0 0; outline: none; cursor: pointer; padding: 12px 20px; font-weight: 600; font-size: 14px; color: #666666; }}
+            
+            .tab {{ display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }}
+            .tab::-webkit-scrollbar {{ display: none; }}
+            .tab button {{ background-color: #f5f5f5; border: 1px solid #e0e0e0; border-bottom: none; border-radius: 8px 8px 0 0; outline: none; cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 13px; color: #666666; white-space: nowrap; flex-shrink: 0; }}
             .tab button:hover {{ background-color: #eeeeee; color: #000000; }}
             .tab button.active {{ background-color: #000000 !important; color: #ffffff !important; border-color: #000000; }}
-            .container {{ padding: 24px; max-width: 1400px; margin: 0 auto; }}
-            .tabcontent {{ display: none; padding: 24px; border: 1px solid #e0e0e0; background: #ffffff !important; border-radius: 0 0 10px 10px; }}
             
-            table {{ width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; background: #ffffff !important; }}
-            th, td {{ border: 1px solid #e0e0e0; padding: 12px 14px; text-align: left; color: #000000 !important; }}
+            .container {{ padding: 16px; max-width: 1400px; margin: 0 auto; }}
+            .tabcontent {{ display: none; padding: 16px; border: 1px solid #e0e0e0; background: #ffffff !important; border-radius: 0 0 10px 10px; }}
+            
+            .table-responsive {{ width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border: 1px solid #e0e0e0; border-radius: 6px; }}
+            table {{ width: 100%; border-collapse: collapse; font-size: 13px; background: #ffffff !important; min-width: 650px; }}
+            th, td {{ border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; color: #000000 !important; }}
             th {{ background-color: #f0f0f0 !important; color: #000000 !important; font-weight: 700; }}
-            tfoot td {{ background-color: #f8f9fa !important; font-weight: 700; font-size: 14px; }}
+            tfoot td {{ background-color: #f8f9fa !important; font-weight: 700; font-size: 13px; }}
             
-            input, select {{ background: #ffffff !important; color: #000000 !important; border: 1px solid #cccccc; border-radius: 6px; padding: 8px 12px; font-size: 14px; width: 100%; margin-bottom: 12px; }}
+            input, select {{ background: #ffffff !important; color: #000000 !important; border: 1px solid #cccccc; border-radius: 6px; padding: 10px 12px; font-size: 15px; width: 100%; margin-bottom: 12px; }}
             input:focus, select:focus {{ border-color: #000000; outline: none; }}
             
             .input-currency-wrapper {{ position: relative; display: flex; align-items: center; margin-bottom: 12px; }}
             .input-currency-wrapper span {{ position: absolute; left: 12px; font-weight: 600; color: #333; z-index: 2; pointer-events: none; }}
             .input-currency-wrapper input {{ padding-left: 28px !important; margin-bottom: 0 !important; }}
 
-            .btn {{ background: #000000 !important; color: #ffffff !important; border: none; padding: 8px 14px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; }}
+            .btn {{ background: #000000 !important; color: #ffffff !important; border: none; padding: 9px 14px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }}
             .btn:hover {{ background: #333333 !important; }}
             .btn-secondary {{ background: #f0f0f0 !important; color: #000000 !important; border: 1px solid #ccc; }}
-            .btn-edit {{ background: #e3f2fd !important; color: #0d47a1 !important; border: 1px solid #bbdefb; padding: 6px 12px; cursor: pointer; border-radius: 5px; font-weight: 600; margin-right: 4px; }}
+            .btn-edit {{ background: #e3f2fd !important; color: #0d47a1 !important; border: 1px solid #bbdefb; padding: 6px 10px; cursor: pointer; border-radius: 5px; font-weight: 600; margin-right: 4px; font-size: 12px; }}
             .btn-edit:hover {{ background: #bbdefb !important; }}
-            .btn-delete {{ background: #fff0f0 !important; color: #d32f2f !important; border: 1px solid #ffcdd2; padding: 6px 12px; cursor: pointer; border-radius: 5px; font-weight: 600; }}
+            .btn-delete {{ background: #fff0f0 !important; color: #d32f2f !important; border: 1px solid #ffcdd2; padding: 6px 10px; cursor: pointer; border-radius: 5px; font-weight: 600; font-size: 12px; }}
             .btn-delete:hover {{ background: #ffe0e0 !important; }}
             
-            .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); }}
-            .modal-content {{ background-color: #ffffff !important; color: #000000 !important; margin: 3% auto; padding: 24px; border-radius: 12px; width: 90%; max-width: 600px; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }}
+            .modal {{ display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); overflow-y: auto; padding: 12px; }}
+            .modal-content {{ background-color: #ffffff !important; color: #000000 !important; margin: 20px auto; padding: 20px; border-radius: 12px; width: 100%; max-width: 600px; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }}
             
-            .card-summary {{ background:#f8f9fa; border:1px solid #e0e0e0; border-radius:8px; padding:15px; margin-bottom:20px; }}
-            .badge-entregado {{ background-color: #e8f5e9 !important; color: #2e7d32 !important; border: 1px solid #a5d6a7; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; }}
+            .card-summary {{ background:#f8f9fa; border:1px solid #e0e0e0; border-radius:8px; padding:15px; margin-bottom:15px; }}
+            .badge-entregado {{ background-color: #e8f5e9 !important; color: #2e7d32 !important; border: 1px solid #a5d6a7; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }}
+
+            .grid-medidas {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }}
+
+            @media (max-width: 768px) {{
+                body {{ padding-top: 135px; }}
+                .header-top {{ align-items: center; }}
+                .header-center-logo {{ display: none; }}
+                h1 {{ font-size: 17px; }}
+                .container {{ padding: 10px; }}
+                .tabcontent {{ padding: 12px; }}
+                .modal-content {{ padding: 16px; margin: 10px auto; }}
+                .grid-medidas {{ grid-template-columns: 1fr; gap: 4px; }}
+            }}
 
             @page {{
                 size: A4 portrait;
@@ -687,6 +704,7 @@ def mostrar_panel(request: Request):
                     width: 100% !important;
                     height: 100% !important;
                     background: #ffffff !important;
+                    padding: 0 !important;
                 }}
                 #modalTicket .modal-content {{
                     border: none !important;
@@ -705,20 +723,20 @@ def mostrar_panel(request: Request):
     <body>
         <div class="header-fixed">
             <div class="header-top">
-                <h1>Alegra Muebles</h1>
+                <h1>Alegre Muebles</h1>
                 
                 <div class="header-center-logo">
-                    <img src="{logo_path}" alt="Logo MRP" onerror="this.src='https://via.placeholder.com/28?text=M'">
-                    <span>Alegra MRP</span>
+                    <img src="{logo_path}" alt="Logo Alegre MRP" onerror="this.src='https://via.placeholder.com/28?text=M'">
+                    <span>Alegre MRP</span>
                 </div>
 
-                <a href="/logout" class="btn" style="text-decoration:none; background:#f5f5f5 !important; color:#000000 !important; border:1px solid #ccc; font-size:13px;">🚪 Cerrar Sesión</a>
+                <a href="/logout" class="btn" style="text-decoration:none; background:#f5f5f5 !important; color:#000000 !important; border:1px solid #ccc; font-size:12px; padding: 6px 10px;">🚪 Salir</a>
             </div>
             
             <div class="tab">
                 <button class="tablinks active" onclick="openTab(event, 'ClientesTab')">Clientes</button>
-                <button class="tablinks" onclick="openTab(event, 'ProdEstandarTab')">Stock de estandarizados</button>
-                <button class="tablinks" onclick="openTab(event, 'ProdTab')">Órdenes de Producción</button>
+                <button class="tablinks" onclick="openTab(event, 'ProdEstandarTab')">Stock Estandarizados</button>
+                <button class="tablinks" onclick="openTab(event, 'ProdTab')">Órdenes Producción</button>
                 <button class="tablinks" onclick="openTab(event, 'BalanceTab')">Balances y Entregas</button>
                 <button class="tablinks" onclick="openTab(event, 'StockTab')">Stock e Insumos</button>
             </div>
@@ -727,102 +745,110 @@ def mostrar_panel(request: Request):
         <div class="container">
             <!-- TAB CLIENTES -->
             <div id="ClientesTab" class="tabcontent" style="display: block;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 12px; flex-wrap: wrap;">
                     <h2>Gestión de Clientes</h2>
                     <button class="btn" onclick="abrirModalNuevoCliente()">+ Nuevo Cliente</button>
                 </div>
-                <table id="tablaClientes">
-                    <thead>
-                        <tr><th>Cliente</th><th>Teléfono</th><th>Servicio</th><th>Monto Total</th><th>Anticipo</th><th>Saldo Pendiente</th><th>Estado</th><th>Cuotas</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tablaClientes">
+                        <thead>
+                            <tr><th>Cliente</th><th>Teléfono</th><th>Servicio</th><th>Monto Total</th><th>Anticipo</th><th>Saldo Pendiente</th><th>Estado</th><th>Cuotas</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB STOCK DE ESTANDARIZADOS -->
             <div id="ProdEstandarTab" class="tabcontent">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 12px; flex-wrap: wrap;">
                     <h2>Stock de Muebles Estandarizados</h2>
                     <button class="btn" onclick="abrirModalNuevoEstandar()">+ Nuevo Mueble Estándar</button>
                 </div>
-                <table id="tablaEstandar">
-                    <thead>
-                        <tr><th>Código</th><th>Mueble</th><th>Stock (Unid.)</th><th>Costo Real</th><th>Gastos / Flete</th><th>Precio Venta</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tablaEstandar">
+                        <thead>
+                            <tr><th>Código</th><th>Mueble</th><th>Stock</th><th>Costo Real</th><th>Gastos / Flete</th><th>Precio Venta</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB PRODUCCION -->
             <div id="ProdTab" class="tabcontent">
                 <h2>Órdenes de Producción</h2>
-                <table id="tablaProduccion">
-                    <thead>
-                        <tr><th>Cliente</th><th>Servicio</th><th>Medidas (Alto x Ancho x Prof)</th><th>Estado</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tablaProduccion">
+                        <thead>
+                            <tr><th>Cliente</th><th>Servicio</th><th>Medidas (Alto x Ancho x Prof)</th><th>Estado</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- TAB BALANCES (VENTAS ARRIBA, GRÁFICO ABAJO, SUMATORIAS) -->
+            <!-- TAB BALANCES -->
             <div id="BalanceTab" class="tabcontent">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-                    <h2>Balances y Registro de Entregas</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                    <h2>Balances y Entregas</h2>
                     <button class="btn" style="background:#2e7d32 !important;" onclick="exportarBalancesExcel()">📊 Exportar a Excel (CSV)</button>
                 </div>
 
-                <div class="card-summary" style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                <div class="card-summary" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
                     <div>
-                        <label style="font-size:12px; font-weight:700;">Fecha Desde:</label>
+                        <label style="font-size:12px; font-weight:700; margin-bottom:4px;">Desde:</label>
                         <input type="date" id="filtroFechaDesde" style="width:auto; margin:0;" onchange="filtrarBalances()">
                     </div>
                     <div>
-                        <label style="font-size:12px; font-weight:700;">Fecha Hasta:</label>
+                        <label style="font-size:12px; font-weight:700; margin-bottom:4px;">Hasta:</label>
                         <input type="date" id="filtroFechaHasta" style="width:auto; margin:0;" onchange="filtrarBalances()">
                     </div>
-                    <button class="btn btn-secondary" onclick="limpiarFiltroFechas()">Limpiar Filtro</button>
+                    <button class="btn btn-secondary" style="margin-top:auto;" onclick="limpiarFiltroFechas()">Limpiar Filtro</button>
                     
-                    <div style="margin-left:auto; text-align:right;">
-                        <span style="font-size:13px; color:#555;">Ganancia Neta Filtrada:</span>
-                        <h3 id="lblGananciaNeta" style="margin:0; color:#2e7d32;">$0,00</h3>
+                    <div style="margin-left:auto; text-align:right; min-width: 140px;">
+                        <span style="font-size:12px; color:#555;">Ganancia Neta:</span>
+                        <h3 id="lblGananciaNeta" style="margin:2px 0 0 0; color:#2e7d32; font-size: 18px;">$0,00</h3>
                     </div>
                 </div>
 
-                <!-- 1. TABLA DE ENTREGAS Y VENTAS ARRIBA -->
-                <table id="tablaBalances">
-                    <thead>
-                        <tr><th>Fecha</th><th>Cliente / Comprador</th><th>Servicio / Producto</th><th>Monto Total</th><th>Costos Materiales</th><th>Gastos Extra / Flete</th><th>Estado</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" style="text-align:right;">TOTALES SUMADOS:</td>
-                            <td id="sumMontoTotal">$0,00</td>
-                            <td id="sumCostoMateriales">$0,00</td>
-                            <td id="sumGastosExtra">$0,00</td>
-                            <td>-</td>
-                        </tr>
-                    </tfoot>
-                </table>
+                <div class="table-responsive">
+                    <table id="tablaBalances">
+                        <thead>
+                            <tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto Total</th><th>Costos Materiales</th><th>Gastos / Flete</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:right;">TOTALES:</td>
+                                <td id="sumMontoTotal">$0,00</td>
+                                <td id="sumCostoMateriales">$0,00</td>
+                                <td id="sumGastosExtra">$0,00</td>
+                                <td>-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
 
-                <!-- 2. GRÁFICO ESTADÍSTICO ABAJO -->
-                <div style="background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; padding:15px; margin-top:25px; max-height:280px;">
+                <div style="background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; padding:12px; margin-top:18px; max-height:280px;">
                     <canvas id="chartBalances" style="max-height:250px;"></canvas>
                 </div>
             </div>
 
             <!-- TAB STOCK E INSUMOS -->
             <div id="StockTab" class="tabcontent">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 12px; flex-wrap: wrap;">
                     <h2>Control de Stock e Insumos</h2>
                     <button class="btn" onclick="abrirModalNuevoInsumo()">+ Nuevo Insumo</button>
                 </div>
-                <table id="tablaStock">
-                    <thead>
-                        <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Cantidad</th><th>Costo Unitario</th><th>Total Invertido</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tablaStock">
+                        <thead>
+                            <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Cantidad</th><th>Costo Unitario</th><th>Total Invertido</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -860,11 +886,11 @@ def mostrar_panel(request: Request):
                         <input type="number" id="cli_cant_cuotas" value="1" min="1" max="36">
                     </div>
 
-                    <h4 style="margin: 15px 0 10px 0;">Medidas para Cálculo de Despiece (mm)</h4>
-                    <div style="display:flex; gap:10px;">
-                        <div><label>Alto (mm)</label><input type="number" id="cli_alto" value="1800"></div>
-                        <div><label>Ancho (mm)</label><input type="number" id="cli_ancho" value="1200"></div>
-                        <div><label>Profundidad (mm)</label><input type="number" id="cli_prof" value="500"></div>
+                    <h4 style="margin: 15px 0 10px 0; font-size:14px;">Medidas para Despiece (mm)</h4>
+                    <div class="grid-medidas">
+                        <div><label style="font-size:12px;">Alto (mm)</label><input type="number" id="cli_alto" value="1800"></div>
+                        <div><label style="font-size:12px;">Ancho (mm)</label><input type="number" id="cli_ancho" value="1200"></div>
+                        <div><label style="font-size:12px;">Profundidad (mm)</label><input type="number" id="cli_prof" value="500"></div>
                     </div>
 
                     <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
@@ -875,7 +901,7 @@ def mostrar_panel(request: Request):
             </div>
         </div>
 
-        <!-- MODAL MUEBLE ESTÁNDAR (CON CALCULADORA DE FLETE) -->
+        <!-- MODAL MUEBLE ESTÁNDAR -->
         <div id="modalEstandar" class="modal">
             <div class="modal-content">
                 <h3 id="modalEstandarTitulo">Nuevo Mueble Estándar</h3>
@@ -903,10 +929,9 @@ def mostrar_panel(request: Request):
                         <input type="text" id="std_gastos" class="input-moneda" placeholder="0" value="0" oninput="formatearMonedaInput(this)">
                     </div>
 
-                    <!-- CALCULADORA PARAMÉTRICA DE FLETE ABAJO -->
                     <div style="background:#f5f5f5; border:1px solid #ddd; padding:12px; border-radius:6px; margin-bottom:15px;">
-                        <p style="margin:0 0 8px 0; font-size:12px; font-weight:700;">🚚 Calculadora de Flete por Kilómetro</p>
-                        <div style="display:flex; gap:10px;">
+                        <p style="margin:0 0 8px 0; font-size:12px; font-weight:700;">🚚 Calculadora de Flete por Km</p>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                             <div>
                                 <label style="font-size:11px;">Distancia (Km)</label>
                                 <input type="number" id="flt_km" value="0" style="margin:0;" oninput="calcularFleteKM()">
@@ -932,26 +957,26 @@ def mostrar_panel(request: Request):
             </div>
         </div>
 
-        <!-- MODAL REGISTRAR VENTA ESTÁNDAR (CAMPO NOMBRE EN BLANCO) -->
+        <!-- MODAL REGISTRAR VENTA ESTÁNDAR -->
         <div id="modalVentaEstandar" class="modal">
-            <div class="modal-content" style="max-width:400px;">
-                <h3>Registrar Venta / Entrega Estándar</h3>
+            <div class="modal-content" style="max-width:420px;">
+                <h3>Registrar Venta / Entrega</h3>
                 <form id="formVentaEstandar" onsubmit="confirmarVentaEstandar(event)">
                     <input type="hidden" id="vta_std_codigo" value="">
                     <p style="font-size:13px; color:#555;" id="vta_std_info"></p>
                     
                     <label>Nombre del Comprador / Cliente</label>
-                    <input type="text" id="vta_std_comprador" placeholder="Ingresa el nombre del cliente" required>
+                    <input type="text" id="vta_std_comprador" placeholder="Ingresa el nombre del comprador" required>
 
                     <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
                         <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalVentaEstandar').style.display='none'">Cancelar</button>
-                        <button type="submit" class="btn" style="background:#2e7d32 !important;">Confirmar Venta y Descontar Stock</button>
+                        <button type="submit" class="btn" style="background:#2e7d32 !important;">Confirmar Venta</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- MODAL DESGLOSE DE CUOTAS Y PAGOS -->
+        <!-- MODAL PLAN DE CUOTAS -->
         <div id="modalCuotas" class="modal">
             <div class="modal-content">
                 <h3 id="modalCuotasTitulo">Plan de Cuotas</h3>
@@ -962,18 +987,18 @@ def mostrar_panel(request: Request):
             </div>
         </div>
 
-        <!-- MODAL IMPRESIÓN DE COMPROBANTE CON ANTICIPO Y HISTORIAL -->
+        <!-- MODAL RECIBO -->
         <div id="modalTicket" class="modal">
             <div class="modal-content" style="max-width: 460px; border: 1px solid #111; padding: 25px;">
                 <div id="ticketImpresion">
                     <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:12px; margin-bottom:15px;">
-                        <img src="{logo_path}" alt="Logo Alegra" style="max-width:80px; height:auto; margin-bottom:6px;" onerror="this.style.display='none'">
-                        <h2 style="margin:0 0 2px 0; font-size:20px; text-transform:uppercase; letter-spacing:1px;">ALEGRA MUEBLES</h2>
+                        <img src="{logo_path}" alt="Logo Alegre" style="max-width:80px; height:auto; margin-bottom:6px;" onerror="this.style.display='none'">
+                        <h2 style="margin:0 0 2px 0; font-size:20px; text-transform:uppercase; letter-spacing:1px;">ALEGRE MUEBLES</h2>
                         <p style="margin:0; font-size:12px; color:#333;">Fabricación de Muebles a Medida</p>
                         <p style="margin:6px 0 0 0; font-size:13px; font-weight:700; background:#f0f0f0; padding:4px; border-radius:4px;">RECIBO DE PAGO</p>
                     </div>
                     
-                    <table style="width:100%; border:none; margin:0 0 15px 0; font-size:13px;">
+                    <table style="width:100%; border:none; margin:0 0 15px 0; font-size:13px; min-width: 100%;">
                         <tr>
                             <td style="border:none; padding:3px 0; color:#555;"><strong>Fecha / Hora:</strong></td>
                             <td style="border:none; padding:3px 0; text-align:right;" id="tktFecha"></td>
@@ -988,7 +1013,6 @@ def mostrar_panel(request: Request):
                         </tr>
                     </table>
 
-                    <!-- ANTICIPO REGISTRADO EN RECIBO -->
                     <div style="background:#f8f8f8; border:1px solid #e0e0e0; padding:12px; border-radius:6px; margin-bottom:15px; font-size:13px;">
                         <p style="margin:0 0 6px 0;" id="tktAnticipo"><strong>Anticipo Registrado:</strong> $0,00</p>
                         <p style="margin:0 0 6px 0;" id="tktDetalleCuota"><strong>Cuota Abonada:</strong> -</p>
@@ -1007,7 +1031,7 @@ def mostrar_panel(request: Request):
 
                     <div style="margin-top:25px; text-align:center; font-size:11px; color:#777; border-top:1px dashed #ccc; padding-top:10px;">
                         <p style="margin:0;">¡Muchas gracias por su confianza!</p>
-                        <p style="margin:2px 0 0 0;">Alegra Muebles - Comprobante de Operación</p>
+                        <p style="margin:2px 0 0 0;">Alegre Muebles - Comprobante de Operación</p>
                     </div>
                 </div>
 
@@ -1091,7 +1115,6 @@ def mostrar_panel(request: Request):
             }}
 
             async function cargarDatos() {{
-                // 1. Cargar Clientes (con Anticipo Visible)
                 let resC = await fetch('/clientes/');
                 clientesGlobales = await resC.json();
                 let tbodyC = document.querySelector("#tablaClientes tbody");
@@ -1103,8 +1126,8 @@ def mostrar_panel(request: Request):
                         : `<span style="background:#f0f0f0; padding:3px 8px; border-radius:4px; font-size:12px;">${{c.estado_produccion}}</span>`;
 
                     let botonCuotas = c.es_plan_cuotas 
-                        ? `<button class="btn btn-secondary" onclick="verCuotasCliente(${{c.id}})">Ver Cuotas (${{c.cuotas.length}})</button>`
-                        : `<span style="font-size:12px; color:#666;">Pago Contado</span>`;
+                        ? `<button class="btn btn-secondary" onclick="verCuotasCliente(${{c.id}})">Cuotas (${{c.cuotas.length}})</button>`
+                        : `<span style="font-size:12px; color:#666;">Contado</span>`;
 
                     tbodyC.innerHTML += `<tr>
                         <td><strong>${{c.nombre}}</strong></td>
@@ -1115,14 +1138,13 @@ def mostrar_panel(request: Request):
                         <td><strong style="color:${{c.saldo_financiar > 0 ? '#d32f2f' : '#2e7d32'}}">${{formatoARS.format(c.saldo_financiar)}}</strong></td>
                         <td>${{badgeEstado}}</td>
                         <td>${{botonCuotas}}</td>
-                        <td>
-                            <button class="btn-edit" onclick="abrirModalEditarCliente(${{c.id}})">✏️ Editar</button>
-                            <button class="btn-delete" onclick="eliminarCliente(${{c.id}})">Eliminar</button>
+                        <td style="white-space: nowrap;">
+                            <button class="btn-edit" onclick="abrirModalEditarCliente(${{c.id}})">✏️</button>
+                            <button class="btn-delete" onclick="eliminarCliente(${{c.id}})">🗑️</button>
                         </td>
                     </tr>`;
                 }});
 
-                // 2. Cargar Stock de Estandarizados (con Cantidad/Stock)
                 let resEst = await fetch('/productos-estandar/');
                 estandarGlobal = await resEst.json();
                 let tbodyEst = document.querySelector("#tablaEstandar tbody");
@@ -1139,15 +1161,14 @@ def mostrar_panel(request: Request):
                         <td>${{formatoARS.format(p.costo_real)}}</td>
                         <td>${{formatoARS.format(p.gastos_extra)}}</td>
                         <td><strong style="color:#2e7d32;">${{formatoARS.format(p.costo_total)}}</strong></td>
-                        <td>
-                            <button class="btn" style="background:#2e7d32 !important; margin-right:4px;" onclick="abrirModalVentaEstandar('${{p.codigo}}')">📦 Vender / Entregar</button>
-                            <button class="btn-edit" onclick="abrirModalEditarEstandar('${{p.codigo}}')">✏️ Editar</button>
-                            <button class="btn-delete" onclick="eliminarEstandar('${{p.codigo}}')">Eliminar</button>
+                        <td style="white-space: nowrap;">
+                            <button class="btn" style="background:#2e7d32 !important; margin-right:4px;" onclick="abrirModalVentaEstandar('${{p.codigo}}')">📦 Vender</button>
+                            <button class="btn-edit" onclick="abrirModalEditarEstandar('${{p.codigo}}')">✏️</button>
+                            <button class="btn-delete" onclick="eliminarEstandar('${{p.codigo}}')">🗑️</button>
                         </td>
                     </tr>`;
                 }});
 
-                // 3. Cargar Stock
                 let resS = await fetch('/stock/');
                 stockGlobal = await resS.json();
                 let tbodyS = document.querySelector("#tablaStock tbody");
@@ -1160,29 +1181,27 @@ def mostrar_panel(request: Request):
                         <td>${{s.cantidad}}</td>
                         <td>${{formatoARS.format(s.precio_costo)}}</td>
                         <td><strong>${{formatoARS.format(s.cantidad * s.precio_costo)}}</strong></td>
-                        <td>
-                            <button class="btn-edit" onclick="abrirModalEditarInsumo('${{s.id_articulo}}')">✏️ Editar</button>
-                            <button class="btn-delete" onclick="eliminarInsumo('${{s.id_articulo}}')">Eliminar</button>
+                        <td style="white-space: nowrap;">
+                            <button class="btn-edit" onclick="abrirModalEditarInsumo('${{s.id_articulo}}')">✏️</button>
+                            <button class="btn-delete" onclick="eliminarInsumo('${{s.id_articulo}}')">🗑️</button>
                         </td>
                     </tr>`;
                 }});
 
-                // 4. Cargar Producción
                 let resP = await fetch('/produccion/');
                 let prodData = await resP.json();
                 let tbodyP = document.querySelector("#tablaProduccion tbody");
                 tbodyP.innerHTML = "";
                 prodData.ordenes.forEach(o => {{
                     let m = o.medidas || {{}};
-                    let esEntregado = o.estado_produccion === 'Entregado';
                     let botonAccion = '';
 
                     if(o.estado_produccion === 'Pendiente') {{
-                        botonAccion = `<button class="btn" onclick="iniciarProd(${{o.id}})">Iniciar Producción</button>`;
+                        botonAccion = `<button class="btn" onclick="iniciarProd(${{o.id}})">Iniciar</button>`;
                     }} else if(o.estado_produccion === 'En Producción') {{
                         botonAccion = `<button class="btn" onclick="finalizarProd(${{o.id}})">Finalizar</button>`;
                     }} else if(o.estado_produccion === 'Listo para Entrega') {{
-                        botonAccion = `<button class="btn" onclick="entregarMueble(${{o.id}})">Entregar Mueble</button>`;
+                        botonAccion = `<button class="btn" onclick="entregarMueble(${{o.id}})">Entregar</button>`;
                     }} else {{
                         botonAccion = `<span class="badge-entregado">✔ Entregado</span>`;
                     }}
@@ -1190,19 +1209,17 @@ def mostrar_panel(request: Request):
                     tbodyP.innerHTML += `<tr>
                         <td><strong>${{o.nombre}}</strong></td>
                         <td>${{o.servicio}}</td>
-                        <td>${{m.alto_mm||1800}} x ${{m.ancho_mm||1200}} x ${{m.profundidad_mm||500}} mm</td>
+                        <td>${{m.alto_mm||1800}}x${{m.ancho_mm||1200}}x${{m.profundidad_mm||500}} mm</td>
                         <td><span style="background:#f0f0f0; padding:3px 8px; border-radius:4px; font-size:12px;">${{o.estado_produccion}}</span></td>
                         <td>${{botonAccion}}</td>
                     </tr>`;
                 }});
 
-                // 5. Cargar Balances
                 let resE = await fetch('/entregas/');
                 entregasGlobales = await resE.json();
                 filtrarBalances();
             }}
 
-            // --- BALANCES: SUMATORIAS Y FILTRO ---
             function filtrarBalances() {{
                 let desde = document.getElementById('filtroFechaDesde').value;
                 let hasta = document.getElementById('filtroFechaHasta').value;
@@ -1237,7 +1254,6 @@ def mostrar_panel(request: Request):
                     </tr>`;
                 }});
 
-                // Actualizar Fila de Sumatoria en el tfoot de la tabla
                 document.getElementById('sumMontoTotal').innerText = formatoARS.format(totIngresos);
                 document.getElementById('sumCostoMateriales').innerText = formatoARS.format(totMateriales);
                 document.getElementById('sumGastosExtra').innerText = formatoARS.format(totGastos);
@@ -1261,7 +1277,7 @@ def mostrar_panel(request: Request):
                 chartBalancesInstance = new Chart(ctx, {{
                     type: 'bar',
                     data: {{
-                        labels: ['Cobrado (Total)', 'Costo Materiales', 'Gastos / Flete', 'Ganancia Neta'],
+                        labels: ['Cobrado', 'Materiales', 'Gastos/Flete', 'Ganancia Neta'],
                         datasets: [{{
                             label: 'Monto ($ ARS)',
                             data: [ingresos, materiales, gastos, ganancia],
@@ -1288,13 +1304,12 @@ def mostrar_panel(request: Request):
                 let encodedUri = encodeURI(csvContent);
                 let link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `balances_alegra_${{new Date().toISOString().slice(0,10)}}.csv`);
+                link.setAttribute("download", `balances_alegre_${{new Date().toISOString().slice(0,10)}}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             }}
 
-            // --- MUEBLES ESTÁNDAR ---
             function abrirModalNuevoEstandar() {{
                 document.getElementById('formEstandar').reset();
                 document.getElementById('std_is_edit').value = 'false';
@@ -1375,8 +1390,8 @@ def mostrar_panel(request: Request):
                 }}
 
                 document.getElementById('vta_std_codigo').value = p.codigo;
-                document.getElementById('vta_std_info').innerText = `Mueble: ${{p.nombre}} | Precio Venta: ${{formatoARS.format(p.costo_total)}} | Stock Actual: ${{p.cantidad}} unid.`;
-                document.getElementById('vta_std_comprador').value = ''; // CAMPO EN BLANCO
+                document.getElementById('vta_std_info').innerText = `Mueble: ${{p.nombre}} | Precio Venta: ${{formatoARS.format(p.costo_total)}} | Stock: ${{p.cantidad}} unid.`;
+                document.getElementById('vta_std_comprador').value = '';
                 document.getElementById('modalVentaEstandar').style.display = 'block';
             }}
 
@@ -1399,7 +1414,6 @@ def mostrar_panel(request: Request):
                 }}
             }}
 
-            // --- CLIENTE ---
             function abrirModalNuevoCliente() {{
                 document.getElementById('formCliente').reset();
                 document.getElementById('cli_id_edit').value = '';
@@ -1475,7 +1489,6 @@ def mostrar_panel(request: Request):
                 }}
             }}
 
-            // --- STOCK ---
             function abrirModalNuevoInsumo() {{
                 document.getElementById('formStock').reset();
                 document.getElementById('stk_is_edit').value = 'false';
@@ -1532,7 +1545,6 @@ def mostrar_panel(request: Request):
                 }}
             }}
 
-            // --- CUOTAS ---
             function verCuotasCliente(clienteId) {{
                 let c = clientesGlobales.find(item => item.id === clienteId);
                 if (!c) return;
@@ -1540,9 +1552,9 @@ def mostrar_panel(request: Request):
                 document.getElementById('modalCuotasTitulo').innerText = `Plan de Cuotas: ${{c.nombre}}`;
                 let html = `<p style="font-size:13px; margin-bottom:15px;"><strong>Mueble:</strong> ${{c.servicio}} | <strong>Total:</strong> ${{formatoARS.format(c.monto_total)}} | <strong>Saldo Restante:</strong> ${{formatoARS.format(c.saldo_financiar)}}</p>`;
                 
-                html += `<table>
+                html += `<div class="table-responsive"><table style="min-width: 500px;">
                     <thead>
-                        <tr><th>N° Cuota</th><th>Monto</th><th>Estado</th><th>Fecha de Pago</th><th>Acción</th></tr>
+                        <tr><th>Cuota</th><th>Monto</th><th>Estado</th><th>Fecha de Pago</th><th>Acción</th></tr>
                     </thead>
                     <tbody>`;
                 
@@ -1552,10 +1564,10 @@ def mostrar_panel(request: Request):
                     let esPagado = q.estado === 'Pagado';
                     let btnPagar = esPagado
                         ? `<button class="btn btn-secondary" onclick="imprimirReciboCuota(${{c.id}}, ${{q.numero}})">📄 Recibo</button>`
-                        : `<button class="btn" onclick="pagarCuotaCliente(${{c.id}}, ${{q.numero}}, ${{q.monto}})">💰 Cobrar Cuota</button>`;
+                        : `<button class="btn" onclick="pagarCuotaCliente(${{c.id}}, ${{q.numero}}, ${{q.monto}})">💰 Cobrar</button>`;
 
                     html += `<tr>
-                        <td><strong>Cuota #${{q.numero}} de ${{totalCuotas}}</strong></td>
+                        <td><strong>#${{q.numero}} de ${{totalCuotas}}</strong></td>
                         <td>${{formatoARS.format(q.monto)}}</td>
                         <td><span style="color:${{esPagado ? '#2e7d32' : '#d32f2f'}}; font-weight:600;">${{q.estado}}</span></td>
                         <td>${{q.fecha_pago || '-'}}</td>
@@ -1563,7 +1575,7 @@ def mostrar_panel(request: Request):
                     </tr>`;
                 }});
 
-                html += `</tbody></table>`;
+                html += `</tbody></table></div>`;
                 document.getElementById('modalCuotasContenido').innerHTML = html;
                 document.getElementById('modalCuotas').style.display = 'block';
             }}
@@ -1608,7 +1620,7 @@ def mostrar_panel(request: Request):
 
                 let histHtml = '';
                 if (cuotasPagadas.length > 0) {{
-                    histHtml += `<table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:11px;">
+                    histHtml += `<table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:11px; min-width:100%;">
                         <thead>
                             <tr style="background:#f0f0f0;">
                                 <th style="border:1px solid #ddd; padding:4px;">Cuota</th>
